@@ -3,13 +3,18 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import google.generativeai as genai
 from pathlib import Path
+from dotenv import load_dotenv
+import PyPDF2
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__, static_folder='static')
 CORS(app)
 
 # Configure Gemini API
-genai.configure(api_key=os.environ.get('GEMINI_API_KEY'))
-model = genai.GenerativeModel('gemini-2.5-pro')
+genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+model = genai.GenerativeModel('gemini-2.0-flash')
 
 # Store conversation history
 conversation_history = []
@@ -24,17 +29,35 @@ def load_documents(data_folder='data'):
         data_path.mkdir(exist_ok=True)
         return ""
     
-    supported_extensions = {'.txt', '.md', '.py', '.json', '.csv', '.html', '.xml'}
+    supported_extensions = {'.txt', '.md', '.py', '.json', '.csv', '.html', '.xml', '.pdf'}
     
     for file_path in data_path.rglob('*'):
         if file_path.is_file() and file_path.suffix.lower() in supported_extensions:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                    documents.append(f"--- Document: {file_path.name} ---\n{content}\n")
-                    print(f"Loaded: {file_path.name}")
+                if file_path.suffix.lower() == '.pdf':
+                    content = extract_pdf_text(file_path)
+                else:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                
+                documents.append(f"--- Document: {file_path.name} ---\n{content}\n")
+                print(f"Loaded: {file_path.name}")
             except Exception as e:
                 print(f"Error loading {file_path}: {e}")
+    
+    return "\n".join(documents)
+
+
+def extract_pdf_text(pdf_path):
+    """Extract text content from a PDF file."""
+    text = []
+    with open(pdf_path, 'rb') as f:
+        reader = PyPDF2.PdfReader(f)
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text.append(page_text)
+    return "\n".join(text)
     
     return "\n".join(documents)
 

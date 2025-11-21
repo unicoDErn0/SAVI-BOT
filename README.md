@@ -71,16 +71,16 @@ A simple chatbot that answers questions based on your documents using Google's G
    └── data.json
    ```
 
-5. **Set your API key**
+5. **Set up your API key**
    
-   Windows:
+   Create a `.env` file in the project root:
    ```bash
-   set GEMINI_API_KEY=your-api-key-here
+   cp .env.example .env
    ```
    
-   Mac/Linux:
-   ```bash
-   export GEMINI_API_KEY=your-api-key-here
+   Then edit `.env` and add your Gemini API key:
+   ```
+   GEMINI_API_KEY=your-api-key-here
    ```
 
 6. **Run the application**
@@ -98,6 +98,9 @@ A simple chatbot that answers questions based on your documents using Google's G
 document-chatbot/
 ├── app.py              # Flask backend server
 ├── requirements.txt    # Python dependencies
+├── .env                # Your API key (create from .env.example)
+├── .env.example        # Example environment file
+├── .gitignore          # Git ignore rules
 ├── README.md           # This file
 ├── data/               # Your documents go here
 │   └── (your files)
@@ -109,6 +112,7 @@ document-chatbot/
 
 | Extension | Description |
 |-----------|-------------|
+| `.pdf`    | PDF documents |
 | `.txt`    | Plain text files |
 | `.md`     | Markdown files |
 | `.json`   | JSON data files |
@@ -130,7 +134,7 @@ app.run(debug=True, port=5000)  # Change 5000 to your desired port
 
 In `app.py`, change the model name:
 ```python
-model = genai.GenerativeModel('gemini-2.5-pro') 
+model = genai.GenerativeModel('gemini-1.5-flash')  # or 'gemini-1.5-pro'
 ```
 
 ## 🛠️ API Endpoints
